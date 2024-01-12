@@ -82,6 +82,7 @@ class VoiceAnnouncementUtils {
         }
 
         double distanceInUnit = totalDistance.toKM_Miles(unitSystem);
+        Speed intervalSpeed = currentInterval != null ? currentInterval.getSpeed() : null;
 
         if (shouldVoiceAnnounceTotalDistance()) {
             builder.append(context.getString(R.string.total_distance));
@@ -99,6 +100,8 @@ class VoiceAnnouncementUtils {
         // Announce time
         Duration movingTime = trackStatistics.getMovingTime();
         if (shouldVoiceAnnounceMovingTime() && !movingTime.isZero()) {
+            builder.append(" ")
+                    .append(context.getString(R.string.moving_time));
             appendDuration(context, builder, movingTime);
             builder.append(".");
         }
@@ -107,16 +110,16 @@ class VoiceAnnouncementUtils {
             if (shouldVoiceAnnounceAverageSpeedPace()) {
                 double speedInUnit = averageMovingSpeed.to(unitSystem);
                 builder.append(" ")
-                        .append(context.getString(R.string.speed));
+                        .append(context.getString(R.string.average_speed));
                 String template = context.getResources().getString(speedId);
                 appendDecimalUnit(builder, MessageFormat.format(template, Map.of("n", speedInUnit)), speedInUnit, 1, unitSpeedTTS);
                 builder.append(".");
             }
-            if (shouldVoiceAnnounceLapSpeedPace() && currentDistancePerTime != null) {
-                double currentDistancePerTimeInUnit = currentDistancePerTime.to(unitSystem);
+            if (shouldVoiceAnnounceLapSpeedPace() && intervalSpeed != null) {
+                double currentDistancePerTimeInUnit = intervalSpeed.to(unitSystem);
                 if (currentDistancePerTimeInUnit > 0) {
                     builder.append(" ")
-                            .append(context.getString(R.string.lap_speed));
+                            .append(context.getString(R.string.speed));
                     String template = context.getResources().getString(speedId);
                     appendDecimalUnit(builder, MessageFormat.format(template, Map.of("n", currentDistancePerTimeInUnit)), currentDistancePerTimeInUnit, 1, unitSpeedTTS);
                     builder.append(".");
@@ -126,18 +129,18 @@ class VoiceAnnouncementUtils {
             if (shouldVoiceAnnounceAverageSpeedPace()) {
                 Duration time = averageMovingSpeed.toPace(unitSystem);
                 builder.append(" ")
-                        .append(context.getString(R.string.pace));
+                        .append(context.getString(R.string.average_pace));
                 appendDuration(context, builder, time);
                 builder.append(" ")
                         .append(context.getString(perUnitStringId))
                         .append(".");
             }
 
-            if (shouldVoiceAnnounceLapSpeedPace() && currentDistancePerTime != null) {
-                Duration currentTime = currentDistancePerTime.toPace(unitSystem);
+            if (shouldVoiceAnnounceLapSpeedPace() && intervalSpeed != null) {
+                Duration time = intervalSpeed.toPace(unitSystem);
                 builder.append(" ")
-                        .append(context.getString(R.string.lap_time));
-                appendDuration(context, builder, currentTime);
+                        .append(context.getString(R.string.pace));
+                appendDuration(context, builder, time);
                 builder.append(" ")
                         .append(context.getString(perUnitStringId))
                         .append(".");
@@ -156,7 +159,7 @@ class VoiceAnnouncementUtils {
             int currentHeartRate = Math.round(currentInterval.getAverageHeartRate().getBPM());
 
             builder.append(" ")
-                    .append(context.getString(R.string.current_heart_rate));
+                    .append(context.getString(R.string.heart_rate));
             appendCardinal(builder, context.getString(R.string.sensor_state_heart_rate_value, currentHeartRate), currentHeartRate);
             builder.append(".");
         }

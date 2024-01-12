@@ -617,7 +617,7 @@ limitations under the License.
     <string name="lap_time">Lap time</string>
     <string name="pace">Pace</string>
     <string name="lap_speed">Lap speed</string>
-    <string name="speed">Average moving speed</string>
+    <string name="speed">Speed</string>
     <string name="total_distance">Total distance</string>
     <string name="voiceDistanceKilometersPlural">
         {n, plural,
@@ -718,6 +718,11 @@ limitations under the License.
     <string name="error_crash_title">%1$s crashed</string>
     <string name="share_crash_report">Share crash report</string>
     <string name="report_bug">Report bug</string>
+
+    <string name="moving_time">Moving time</string>
+    <string name="average_speed">Average speed</string>
+    <string name="average_pace">Average pace</string>
+    <string name="heart_rate">Heart rate</string>
 
     <string name="select_show_on_map_behavior">Select \"show on map\" behavior</string>
     <string name="show_on_map_format_ask">Ask</string>
