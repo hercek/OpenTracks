@@ -60,7 +60,7 @@ public abstract class Aggregator<Input, Output> {
     /**
      * Is the data recent considering the current time.
      */
-    private boolean isRecent() {
+    protected boolean isRecent() {
         if (previous == null) {
             return false;
         }
