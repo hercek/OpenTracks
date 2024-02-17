@@ -29,6 +29,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import java.time.Duration;
 
 import de.dennisguse.opentracks.R;
 import de.dennisguse.opentracks.TrackRecordedActivity;
@@ -157,8 +158,8 @@ public class StatisticsRecordedFragment extends Fragment {
                     }
 
                     loadTrackDescription(track);
-                    updateUI();
-                    updateSensorUI();
+                    float toMovingAfgFactor = updateUI();
+                    updateSensorUI(toMovingAfgFactor);
 
                     ((TrackRecordedActivity) getActivity()).startPostponedEnterTransitionWith(viewBinding.statsActivityTypeIcon);
                 }
@@ -172,7 +173,7 @@ public class StatisticsRecordedFragment extends Fragment {
         viewBinding.statsStartDatetimeValue.setText(StringUtils.formatDateTimeWithOffsetIfDifferent(track.getStartTime()));
     }
 
-    private void updateUI() {
+    private float updateUI() {
         TrackStatistics trackStatistics = track.getTrackStatistics();
         // Set total distance
         {
@@ -194,9 +195,11 @@ public class StatisticsRecordedFragment extends Fragment {
         }
 
         // Set time and start datetime
+        Duration movingTime = trackStatistics.getMovingTime();
+        Duration totalTime = trackStatistics.getTotalTime();
         {
-            viewBinding.statsMovingTimeValue.setText(StringUtils.formatElapsedTime(trackStatistics.getMovingTime()));
-            viewBinding.statsTotalTimeValue.setText(StringUtils.formatElapsedTime(trackStatistics.getTotalTime()));
+            viewBinding.statsMovingTimeValue.setText(StringUtils.formatElapsedTime(movingTime));
+            viewBinding.statsTotalTimeValue.setText(StringUtils.formatElapsedTime(totalTime));
         }
 
         SpeedFormatter formatter = SpeedFormatter.Builder().setUnit(unitSystem).setReportSpeedOrPace(preferenceReportSpeed).build(getContext());
@@ -245,16 +248,20 @@ public class StatisticsRecordedFragment extends Fragment {
             boolean show = altitudeGain_m != null && altitudeLoss_m != null;
             viewBinding.statsAltitudeGroup.setVisibility(show ? View.VISIBLE : View.GONE);
         }
+
+        float movingTimeSeconds = movingTime.getSeconds();
+        if (movingTimeSeconds <= 0) return 0;
+        return totalTime.getSeconds()/movingTimeSeconds;
     }
 
-    private void updateSensorUI() {
+    private void updateSensorUI(float toMovingAvgFactor) {
         if (sensorStatistics == null) {
             return;
         }
 
         if (sensorStatistics.hasHeartRate()) {
             String maxBPM = String.valueOf(Math.round(sensorStatistics.maxHeartRate().getBPM()));
-            String avgBPM = String.valueOf(Math.round(sensorStatistics.avgHeartRate().getBPM()));
+            String avgBPM = String.valueOf(Math.round(toMovingAvgFactor*sensorStatistics.avgHeartRate().getBPM()));
 
             viewBinding.statsHeartRateGroup.setVisibility(View.VISIBLE);
             viewBinding.statsMaxHeartRateValue.setText(maxBPM);
@@ -262,7 +269,7 @@ public class StatisticsRecordedFragment extends Fragment {
         }
         if (sensorStatistics.hasCadence()) {
             String maxRPM = String.valueOf(Math.round(sensorStatistics.maxCadence().getRPM()));
-            String avgRPM = String.valueOf(Math.round(sensorStatistics.avgCadence().getRPM()));
+            String avgRPM = String.valueOf(Math.round(toMovingAvgFactor*sensorStatistics.avgCadence().getRPM()));
 
             viewBinding.statsCadenceGroup.setVisibility(View.VISIBLE);
             viewBinding.statsMaxCadenceValue.setText(maxRPM);
@@ -270,7 +277,7 @@ public class StatisticsRecordedFragment extends Fragment {
         }
         if (sensorStatistics.hasPower()) {
             String maxW = String.valueOf(Math.round(sensorStatistics.maxPower().getW()));
-            String avgW = String.valueOf(Math.round(sensorStatistics.avgPower().getW()));
+            String avgW = String.valueOf(Math.round(toMovingAvgFactor*sensorStatistics.avgPower().getW()));
 
             viewBinding.statsPowerGroup.setVisibility(View.VISIBLE);
             viewBinding.statsMaxPowerValue.setText(maxW);
